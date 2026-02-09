@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Minecraft – シンプル着地ページ</title>
+  <meta name="description" content="Minecraft！！！" />
+  <meta name="color-scheme" content="light dark">
+
+  <!-- Web フォント（レトロ&日本語） -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #0b0f11;           /* 背景ベース */
+      --bg-2: #10161a;         /* カード背景 */
+      --text: #e6f1ff;         /* 文字 */
+      --muted: #93a4b3;        /* 補助文字 */
+      --accent: #00df81;       /* アクセント（エメラルド） */
+      --accent-2: #2bd4ff;     /* アクセント（アクア） */
+      --border: rgba(255,255,255,0.12);
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0,0,0,0.35);
+      --radius: 18px;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f4f7fb;
+        --bg-2: #ffffff;
+        --text: #0f1720;
+        --muted: #5a6b79;
+        --border: rgba(0,0,0,0.12);
+        --shadow: 0 18px 48px rgba(0, 0, 0, 0.08), 0 2px 10px rgba(0,0,0,0.05);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+
+    body {
+      margin: 0;
+      font-family: 'Noto Sans JP', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--text);
+      background: var(--bg);
+      /* ピクセルっぽい背景（レイヤー重ね） */
+      background-image:
+        radial-gradient(1000px 600px at 70% -10%, rgba(43,212,255,0.20), transparent 60%),
+        radial-gradient(900px 500px at -10% 20%, rgba(0,223,129,0.18), transparent 55%),
+        linear-gradient(transparent 0 0),
+        repeating-linear-gradient(
+          45deg,
+          rgba(255,255,255,0.04) 0 12px,
+          rgba(255,255,255,0.02) 12px 24px
+        );
+      background-attachment: fixed;
+    }
+
+    .container {
+      min-height: 100%;
+      display: grid;
+      place-items: center;
+      padding: 6vh 20px;
+    }
+
+    .card {
+      width: min(980px, 100%);
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.00)) var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* カード内の飾りライン */
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      background: conic-gradient(from 180deg at 50% 50%,
+        rgba(0,223,129,0.15), rgba(43,212,255,0.15), rgba(0,223,129,0.15));
+      filter: blur(22px);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .inner {
+      position: relative;
+      z-index: 1;
+      padding: clamp(28px, 5vw, 56px);
+      display: grid;
+      gap: clamp(18px, 2vw, 26px);
+    }
+
+    /* 見出し（Minecraftの大きい文字） */
+    .title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(36px, 6vw, 80px);
+      line-height: 1.05;
+      letter-spacing: 1px;
+      margin: 0;
+      display: inline-block;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter: drop-shadow(0 10px 14px rgba(0,0,0,0.35));
+      text-shadow: 0 0 0 rgba(0,0,0,0);
+    }
+
+    .subtitle {
+      margin: 0;
+      font-size: clamp(14px, 2.2vw, 18px);
+      color: var(--muted);
+    }
+
+    .desc {
+      margin-top: 6px;
+      font-size: clamp(16px, 2.4vw, 18px);
+      line-height: 1.9;
+      color: var(--text);
+      opacity: 0.96;
+    }
+
+    .actions {
+      margin-top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .btn {
+      --btn-bg: #111;
+      --btn-fg: #fff;
+      --btn-border: rgba(255,255,255,0.18);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 18px;
+      border-radius: 14px;
+      text-decoration: none;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      border: 1px solid var(--btn-border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.01)) var(--btn-bg);
+      color: var(--btn-fg);
+      transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease, background .3s ease;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.25);
+      will-change: transform;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 30px rgba(0,0,0,0.28);
+      border-color: rgba(255,255,255,0.32);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+    }
+
+    .btn--primary {
+      --btn-bg: linear-gradient(135deg, rgba(0,223,129,0.18), rgba(43,212,255,0.18));
+      --btn-fg: var(--text);
+      --btn-border: linear-gradient(135deg, rgba(0,223,129,0.5), rgba(43,212,255,0.5));
+      border-image: var(--btn-border) 1;
+      border: 1px solid transparent;
+      backdrop-filter: blur(3px);
+    }
+
+    .btn--ghost {
+      --btn-bg: transparent;
+      --btn-fg: var(--text);
+      border: 1px dashed var(--border);
+    }
+
+    .btn svg {
+      width: 18px; height: 18px; flex: 0 0 auto;
+    }
+
+    .meta {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* わずかな浮遊アニメーション */
+    .floaty { animation: floaty 6s ease-in-out infinite; }
+    @keyframes floaty {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-6px); }
+    }
+
+    /* 小さなフッター */
+    footer {
+      text-align: center;
+      padding: 22px 10px 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* アクセシビリティ向上 */
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <main class="card">
+      <div class="inner">
+        <header class="floaty">
+          <h1 class="title" aria-label="Minecraft">Minecraft</h1>
+          <p class="subtitle">偽物非公式マインクラフト</p>
+        </header>
+
+        <section>
+          <p class="desc">これは、ブラウザで遊べる無料のMinecraftです。このページは他の人に共有しないでください。<br><a href="https://servers.eaglercraft.com/https://servers.eaglercraft.com/">https://servers.eaglercraft.com/</a>で、参加できるサーバーのリストを見ることができます。<br>連絡を取るために、下のチャットルームを開いてください。</p>
+          <div class="actions" role="group" aria-label="操作リンク">
+            <a class="btn btn--primary" href="https://a0.rf.gd/#dhewuifdus" target="_blank" rel="noopener noreferrer" aria-label="チャットルームを新しいタブで開く">
+              <!-- ふきだし風アイコン -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+              </svg>
+              チャットルームを開く
+            </a>
+            <a class="btn btn--ghost" href="https://yeelauncher.s3.amazonaws.com/index.html#/MS4xMndhc20" aria-label="ページを開く（ShowModGUI）">
+              <!-- 矢印アイコン -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+              高速化(WASM)マイクラを開く
+            </a>
+            <a class="btn btn--ghost" href="/index.html?ShowModGUI" aria-label="ページを開く（ShowModGUI）">
+              <!-- 矢印アイコン -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+              前のバージョンのマイクラを開く
+            </a>
+          </div>
+          <p class="meta">※ 外部リンクは新しいタブで開きます。</p>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

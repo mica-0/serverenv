@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="und" style="width:100%;height:100%;background-color:black;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
+    <meta name="description" content="Eaglercraft 1.12.2">
+    <meta name="keywords" content="eaglercraft, minecraft">
+    <title>Eaglercraft 1.12.2</title>
+    <script type="text/javascript">
+        "use strict";
+        if (false) {
+            alert("Этот HTML-файл невозможно \"открыть\" непосредственно в браузере.Вы можете загрузить его на свой HTTP-сервер и получить к нему доступ для воспроизведения.Это не ошибка.Смотрите сопроводительную документацию.");
+        } else {
+            window.addEventListener("load", function(){
+                const relayId = Math.floor(Math.random() * 3);
+                window.eaglercraftXOpts = {
+                    container: "game_frame", assetsURI: "assets.epk", worldsFolder: "MAIN", worldsDB: "worlds",
+                    servers: [
+                        { serverName: "Server", serverAddress: "wss://tcp1.tunnel4.com:40219/", hideAddress: true }
+                    ],
+                };
+                (function(){
+                    var q = window.location.search;
+                    if (typeof q === 'string' && q.startsWith("?")) {
+                        q = new URLSearchParams(q);
+                        var s = q.get("server");
+                        if (s) window.minecraftOpts.push(s);
+                    }
+                })();
+                main();
+            });
+        }
+    </script>
+    <script type="text/javascript" src="classes.js">
+    </script>
+    <script type="text/javascript">
+        "use strict";
+        (function(){
+            var launchInterval = -1;
+            var launchCounter = 1;
+            var launchCountdownNumberElement = null;
+            var launchCountdownProgressElement = null;
+            var launchSkipCountdown = false;
+            var launchTick = function() {
+                var urlParams = new URLSearchParams(window.location.search);
+                var showModGUI = urlParams.has('ShowModGUI');
+
+                var countdownScreen = document.getElementById("launch_countdown_screen");
+                if (countdownScreen && countdownScreen.parentNode) {
+                    document.body.removeChild(countdownScreen);
+                }
+
+                // Запускайте только в том случае, если игра еще не началась
+                if (!window.eaglercraftXRunning) {
+                    window.eaglercraftXRunning = true;
+                    document.body.style.backgroundColor = "black";
+
+                    if (showModGUI) {
+                        // Если указан параметр ShowModGUI, проверьте, отображается ли графический интерфейс мода.
+                        if (!document.getElementById("modapi_gui_container")) {
+                            main();
+                            ModAPI.hooks._postInit();
+                        }
+                        // Не очищайте интервал (проверяйте постоянно)
+                        // * При необходимости явно избегайте clearInterval
+                    } else {
+                        // Запустите немедленно, если ShowModGUI не указан.
+                        main();
+                        ModAPI.hooks._postInit();
+                        clearInterval(launchInterval);
+                    }
+                }
+            };
+
+            window.addEventListener("load", function() {
+                launchCountdownNumberElement = document.getElementById("launchCountdownNumber");
+                launchCountdownProgressElement = document.getElementById("launchCountdownProgress");
+                launchInterval = setInterval(launchTick, 50);
+                // document.getElementById("bootMenu").addEventListener("click", function() {
+                //     launchSkipCountdown = true;
+                //     window.eaglercraftXOpts.showBootMenuOnLaunch = true;
+                // });
+            });
+        })();
+    </script>
+    <link type="image/png" rel="shortcut icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAFiUAABYlAUlSJPAAAAR/SURBVEhLtZXZK3ZRFMYPcqXc+gv413DHxVuGIpIhkciQWaRccCNjSCkligwXSOZ5nmfv9zvn2e8+58V753sudmuvvdZ61l5r7XOc8H+GS/D19aUNkPz5+aktQH5/f//4+LBKZKuRkpUtQjCUYG5gD2T38vLy/PwsDfL9/f3Dw8PT05M0b29vnKLhCKCBT4L4gvBLBIei4//4+Hh1dUVEQutUuLu7E83FxQUGnKLBWKfQaA3S+AREVxaEOD8/Pzk50XpzcyMDcH19zdZG3N3d3dzc3Nvb01aX5pQUpQGGQJxcQpfNysoKhUIdHR1o1tbWbInYAgxIPDMzMy8vLzc3FxqOdMoRqwJK8G8ALUYIhHMiSEhIwI6CyIb0qQzC4eGhsXCc1tZWnZIEKzdQJQSXgKxfX18RCM3Z5eWlcfVAxKOjo+Pj49PTU88lTOk2NjbMsePc3t6SAfcgFdszOyMuAdeBg0CQi2lhYUHOeOLDCisN8FzcPFZXV3t7ezHY3t5GQ+6it+2xMASsKhEEWKsmRLRBBUpPvpJ/TpFKFBwKYAiITmicsbYhdHfJAltqhUCVsCQhwslmeXmZxiBQT9c0Ar9E2O3v72sYSE0N1yQArkKy0kBMXLqlZqIZHR3t6empqqqSDcBdhXEJSJ/bUc3q6uq+vj629GB9fR1WsLW1NTs7u7S0RN2locMjIyOEm5ubQ7+4uJienk4/+vv77Y1hwhLBEKhwWHitdVFfX9/Y2Gg2HuLi4owUAysrK8yCG97rh0+ApP5Q2ZycHFlPTExUVFRIBvn5+WhKSkp2dnaMKhptbW2426GgQ/rwuAQCZ1hwFayLiork9hMFBQV1dXVmE0BLS4vqw3QFB8kn4IAxoGPkYpxi4FeDmpqas7Mz4pClAgqGwD48rjY2NmacYqC0tJQ1KSlJWyE5OZkpUKkBAxZVIntAoZh04+Q48fHxPNGBgYHExMT29naj9cBodnZ2mo3jlJWVMeW2OGQck4B1amqqoaGhqamJjx2lGxwcpL0mUgR8fJhsWqJtSkoKU2SbHHUDpkhPBujd8xuQG6PJRM/Pz09PT7O1NNnZ2Tw3fgZkXVhYKCUlUhBATP+hCVyKZGky17RV0g04laayslJ6hlVeFHB4eFhKaogGd0LxtmTgE+hbhKDnPjMzgw8E3qGL2tpaBWpubjYqj2BoaEj6rq4uNATRZ0ZwCbiL6gXEzINk5vCBQJ9rMD4+rkA8QNK036uDg4Py8vLu7m680KjIBNR3zBDoWQM1g98snyB+VSoRW8C/UwR81/SvhgNj9JOTkwwVERUdRBEI0BAdLRVERkhLS8vIyEDQlrsTPTU1lVFhKxARvZgUlFLbegCf4BvIsbi4mIg4E5EogIHhiKCMtU0WUFiVy06j5fAJIDdSBDQw+PegDfBRcbOPwH4F9LuFWIIQdQNKwWqzIE0aoFUaBsw+SQuFw0uNtC9A+F4i3QNrbg3IDn+SAsHh+wYiEpeyBEMLv/cAO6KzAijxxB+Y4wisBhssJUhjEbPJf4Nw+B+JXqLW3bw+wQAAAABJRU5ErkJggg==">
+</head>
+<body style="margin:0px;width:100%;height:100%;overflow:hidden;background-color:#121212;" id="game_frame">
+    <script id="modapi_patchesreg_events">globalThis.modapi_specialevents = [`render`];;</script>
+    <script id="modapi_postinit" src="modapi1.js"></script>
+    <script id="modapi_modloader">
+        (() => {
+            globalThis.promisifyIDBRequest = function promisifyIDBRequest(request) {
+                return new Promise((resolve, reject) => {
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            globalThis.getDatabase = async function getDatabase() {
+                const dbRequest = indexedDB.open("EF_MODS");
+                const db = await promisifyIDBRequest(dbRequest);
+
+                if (!db.objectStoreNames.contains("filesystem")) {
+                    db.close();
+                    const version = db.version + 1;
+                    const upgradeRequest = indexedDB.open("EF_MODS", version);
+                    upgradeRequest.onupgradeneeded = (event) => {
+                        const upgradedDb = event.target.result;
+                        upgradedDb.createObjectStore("filesystem");
+                    };
+                    return promisifyIDBRequest(upgradeRequest);
+                }
+
+                return db;
+            }
+
+            globalThis.getMods = async function getMods() {
+                const db = await getDatabase();
+                const transaction = db.transaction(["filesystem"], "readonly");
+                const objectStore = transaction.objectStore("filesystem");
+                const object = await promisifyIDBRequest(objectStore.get("mods.txt"));
+                var out = object ? (await object.text()).split("|").toSorted() : [];
+                db.close();
+                return out;
+            }
+
+            globalThis.getMod = async function getMod(mod) {
+                const db = await getDatabase();
+                const transaction = db.transaction(["filesystem"], "readonly");
+                const objectStore = transaction.objectStore("filesystem");
+                const object = await promisifyIDBRequest(objectStore.get("mods/" + mod));
+                var out =  object ? (await object.text()) : "";
+                db.close();
+                return out;
+            }
+
+            globalThis.saveMods = async function saveMods(mods) {
+                const db = await getDatabase();
+                const transaction = db.transaction(["filesystem"], "readwrite");
+                const objectStore = transaction.objectStore("filesystem");
+                const encoder = new TextEncoder();
+                const modsData = encoder.encode(mods.toSorted().join("|"));
+                const modsBlob = new Blob([modsData], { type: "text/plain" });
+                await promisifyIDBRequest(objectStore.put(modsBlob, "mods.txt"));
+                db.close();
+            }
+
+            globalThis.addMod = async function addMod(mod) {
+                const mods = await getMods();
+                mods.push("web@" + mod);
+                await saveMods(mods);
+            }
+
+            globalThis.addFileMod = async function addFileMod(mod, textContents) {
+                const mods = await getMods();
+                if (mods.includes(mod)) {
+                    await removeMod(mods.indexOf(mod));
+                } else {
+                    mods.push(mod);
+                }
+                await saveMods(mods);
+
+                const db = await getDatabase();
+                const transaction = db.transaction(["filesystem"], "readwrite");
+                const objectStore = transaction.objectStore("filesystem");
+                const encoder = new TextEncoder();
+                const modsData = encoder.encode(textContents);
+                const modsBlob = new Blob([modsData], { type: "text/plain" });
+                await promisifyIDBRequest(objectStore.put(modsBlob, "mods/" + mod));
+                db.close();
+            }
+
+            globalThis.removeMod = async function removeMod(index) {
+                const mods = await getMods();
+                if (index >= 0 && index < mods.length) {
+                    var deleted = mods.splice(index, 1)[0];
+                    await saveMods(mods);
+                    if (!deleted.startsWith("web@")) {
+                        const db = await getDatabase();
+                        const transaction = db.transaction(["filesystem"], "readwrite");
+                        const objectStore = transaction.objectStore("filesystem");
+                        await promisifyIDBRequest(objectStore.delete("mods/" + deleted));
+                        db.close();
+                    }
+                }
+            }
+
+            globalThis.resetMods = async function resetMods() {
+                console.log("Resetting mods...");
+                const db = await getDatabase();
+                const transaction = db.transaction(["filesystem"], "readwrite");
+                const objectStore = transaction.objectStore("filesystem");
+                await promisifyIDBRequest(objectStore.clear());
+                console.log("Mods reset");
+                db.close();
+            }
+
+            globalThis.modLoader = async function modLoader(modsArr = []) {
+                if (!window.eaglerMLoaderMainRun) {
+                    var searchParams = new URLSearchParams(location.search);
+                    searchParams.getAll("mod").forEach((modToAdd) => {
+                        console.log(
+                            "[EaglerML] Adding mod to loadlist from search params: " + modToAdd
+                        );
+                        modsArr.push("web@" + modToAdd);
+                    });
+                    searchParams.getAll("plugin").forEach((modToAdd) => {
+                        console.log(
+                            "[EaglerML] Adding mod to loadlist from search params: " + modToAdd
+                        );
+                        modsArr.push("web@" + modToAdd);
+                    });
+                    if (
+                        !!eaglercraftXOpts &&
+                        !!eaglercraftXOpts.Mods &&
+                        Array.isArray(eaglercraftXOpts.Mods)
+                    ) {
+                        eaglercraftXOpts.Mods.forEach((modToAdd) => {
+                            console.log(
+                                "[EaglerML] Adding mod to loadlist from eaglercraftXOpts: " +
+                                modToAdd
+                            );
+                            modsArr.push("web@" + modToAdd);
+                        });
+                    }
+
+                    console.log("[EaglerML] Searching in iDB");
+                    try {
+                        var idbMods = await getMods();
+                        modsArr = modsArr.concat(idbMods
+                            .filter(x => { return x && x.length > 0 })
+                        );
+                    } catch (error) {
+                        console.error(error);
+                    }
+
+                    window.eaglerMLoaderMainRun = true;
+                }
+                if (window.noLoadMods === true) {
+                    modsArr.splice(0, modsArr.length);
+                }
+                function checkModsLoaded(totalLoaded, identifier) {
+                    console.log(
+                        "[EaglerML] Checking if mods are finished :: " +
+                        totalLoaded +
+                        "/" +
+                        modsArr.length
+                    );
+                    if (totalLoaded >= modsArr.length) {
+                        clearInterval(identifier);
+                        window.ModGracePeriod = false;
+                        if (
+                            window.eaglerMLoaderMainRun &&
+                            ModAPI &&
+                            ModAPI.events &&
+                            ModAPI.events.callEvent
+                        ) {
+                            ModAPI.events.callEvent("load", {});
+                        }
+                        console.log(
+                            "[EaglerML] Checking if mods are finished :: All mods loaded! Grace period off."
+                        );
+                    }
+                }
+                function methodB(currentMod) {
+                    try {
+                        console.log("[EaglerML] Loading " + currentMod + " via method B.");
+                        var script = document.createElement("script");
+                        script.setAttribute("data-hash", ModAPI.util.hashCode("web@" + currentMod));
+                        script.src = currentMod;
+                        script.setAttribute("data-isMod", "true");
+                        script.onerror = () => {
+                            console.log(
+                                "[EaglerML] Failed to load " + currentMod + " via method B!"
+                            );
+                            script.remove();
+                            totalLoaded++;
+                        };
+                        script.onload = () => {
+                            console.log(
+                                "[EaglerML] Successfully loaded " + currentMod + " via method B."
+                            );
+                            totalLoaded++;
+                        };
+                        document.body.appendChild(script);
+                    } catch (error) {
+                        console.log(
+                            "[EaglerML] Oh no! The mod " + currentMod + " failed to load!"
+                        );
+                        totalLoaded++;
+                    }
+                }
+                window.ModGracePeriod = true;
+                var totalLoaded = 0;
+                var loaderCheckInterval = null;
+                modsArr.sort();
+                for (let i = 0; i < modsArr.length; i++) {
+                    let currentMod = modsArr[i];
+                    var isIDBMod = !currentMod.startsWith("web@");
+                    if (!isIDBMod) {
+                        currentMod = currentMod.replace("web@", "");
+                    }
+                    console.log("[EaglerML] Starting " + currentMod);
+                    try {
+                        var responseText = isIDBMod ? await getMod(currentMod) : await (await fetch(currentMod)).text();
+                        console.log("[EaglerML] Loading " + currentMod + " via method A.");
+                        var script = document.createElement("script");
+                        script.setAttribute("data-hash", ModAPI.util.hashCode((isIDBMod ? "" : "web@") + currentMod));
+                        try {
+                            script.src =
+                                "data:text/javascript," + encodeURIComponent(responseText);
+                        } catch (error) {
+                            methodB(currentMod);
+                            return;
+                        }
+                        script.setAttribute("data-isMod", "true");
+                        script.onerror = () => {
+                            console.log(
+                                "[EaglerML] Failed to load " + currentMod + " via method A!"
+                            );
+                            script.remove();
+                            totalLoaded++;
+                        };
+                        script.onload = () => {
+                            console.log(
+                                "[EaglerML] Successfully loaded " + currentMod + " via method A."
+                            );
+                            totalLoaded++;
+                        };
+                        document.body.appendChild(script);
+                    } catch (error) {
+                        methodB(currentMod);
+                    }
+                }
+                loaderCheckInterval = setInterval(() => {
+                    checkModsLoaded(totalLoaded, loaderCheckInterval);
+                }, 500);
+                console.log(
+                    "[EaglerML] Starting to load " + modsArr.length + " mods..."
+                );
+                window.returnTotalLoadedMods = function returnTotalLoadedMods() {
+                    return totalLoaded;
+                };
+            };
+        })();
+    </script>
+    <script id="modapi_guikit">(() => {
+        var splashes = [
+            "Это не теее дройды..."
+        ];
+        var gui = `<div id="modapi_gui_container">
+            <header>
+                <h1 class="title">EaglerForge Mod Manager</h1>
+                <h4>
+                    {splash_msg}
+                </h4>
+            </header>
+            <style>
+                #modapi_gui_container td:not(.nothing):not(:has(.button)) {
+                padding: 0.5rem 1.5rem;
+                margin: 0.5rem;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                }
+                #modapi_gui_container td.nothing {
+                user-select: none;
+                opacity: 0;
+                width: 5rem;
+                }
+                #modapi_gui_container td {
+                text-align: center;
+                }
+                #modapi_gui_container h4, #modapi_gui_container h5 {
+                padding-bottom: 0;
+                margin-bottom: 0;
+                }
+                #modapi_gui_container h5 {
+                color: white;
+                text-shadow: 0px 0px 10px rgba(255,0,0,0.5);
+                font-size: 0.75rem;
+                }
+                #modapi_gui_container a {
+                color: white;
+                transition: 1s;
+                }
+                #modapi_gui_container a:hover {
+                color: lightblue;
+                }
+
+                #modapi_gui_container {
+                overflow-y: scroll;
+                overflow-x: hidden;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: space-between;
+                height: 100vh;
+                width: 100vw;
+                position: fixed;
+                z-index: 127;
+                top: 0;
+                left: 0;
+                font-family: sans-serif;
+                background: white;
+                }
+
+                #modapi_gui_container header {
+                background-color: #333;
+                width: 100%;
+                padding: 1rem 0;
+                text-align: center;
+                color: white;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                }
+
+                #modapi_gui_container .title {
+                font-size: 3rem;
+                margin: 0;
+                font-weight: 700;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+                }
+
+                #modapi_gui_container .controls {
+                display: flex;
+                gap: 1rem;
+                margin-bottom: 2rem;
+                flex-wrap: wrap;
+                justify-content: center;
+                width: 100%;
+                }
+
+                #modapi_gui_container .button {
+                background-color: #555;
+                color: white;
+                padding: 12px 24px;
+                font-size: 1rem;
+                font-weight: 600;
+                border: none;
+                border-radius: 2px;
+                cursor: pointer;
+                transition: background-color 0.3s ease, transform 0.2s ease;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                }
+
+                #modapi_gui_container .button:hover {
+                background-color: #777;
+                transform: translateY(-2px);
+                }
+
+                #modapi_gui_container footer {
+                width: 100%;
+                padding: 1rem;
+                background-color: #333;
+                text-align: center;
+                color: white;
+                font-size: 1.25rem;
+                box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+                }
+                #modapi_gui_modTable {
+                min-width: 40vw;
+                }
+            </style>
+            </div>`;
+            
+        async function fileToText(file) {
+            return new Promise((res, rej) => {
+                var fr = new FileReader();
+                fr.addEventListener("error", (e) => { rej(e); });
+                fr.addEventListener("load", (e) => { res(fr.result); });
+                fr.readAsText(file);
+            });
+        }
+        window.modapi_displayModGui = async function (cb) {
+            if (!getMods) {
+                return;
+            }
+            if (document.querySelector("#modapi_gui_container") && !cb) {
+                return;
+            }
+            if (document.querySelector("#modapi_gui_container")) {
+                cb ||= document.querySelector("#modapi_gui_container")._cb;
+                document.querySelector("#modapi_gui_container").remove();
+            }
+
+            var element = document.createElement("div");
+            element.innerHTML = gui.replace("{splash_msg}", splashes[Math.floor(Math.random() * splashes.length)]);
+            // document.body.appendChild(element);
+            document.querySelector("#modapi_gui_container")._cb = cb;
+
+            var modsList = await getMods();
+            var tbody = document.querySelector("#modapi_gui_container #modapi_gui_modTable tbody");
+            tbody.innerHTML = "";
+            modsList.forEach((modtxt, i) => {
+                if (!modtxt) { return }
+                var hash = ModAPI.util.hashCode(modtxt);
+                var tr = document.createElement("tr");
+                var mod = document.createElement("td");
+
+                if (ModAPI.meta._titleMap[hash]) {
+                    // Mod has metadata
+                    if (ModAPI.meta._iconMap[hash]) {
+                        var img = document.createElement("img");
+                        img.style.width = "48px";
+                        img.style.height = "48px";
+                        img.style.imageRendering = "pixelated";
+                        img.src = ModAPI.meta._iconMap[hash];
+                        // mod.appendChild(img);
+                    }
+                    var h4 = document.createElement("h4");
+                    h4.style.margin = 0;
+                    h4.style.padding = 0;
+                    h4.innerText = ModAPI.meta._titleMap[hash] + (ModAPI.meta._versionMap[hash] ? " " + ModAPI.meta._versionMap[hash] : "");
+                    // mod.appendChild(h4);
+                    if (ModAPI.meta._developerMap[hash]) {
+                        var h6 = document.createElement("h6");
+                        h6.style.margin = 0;
+                        h6.style.padding = 0;
+                        h6.innerText = ModAPI.meta._developerMap[hash];
+                        // mod.appendChild(h6);
+                    }
+                    if (ModAPI.meta._descriptionMap[hash]) {
+                        var span = document.createElement("span");
+                        span.style.fontSize = "0.65rem";
+                        span.innerText = ModAPI.meta._descriptionMap[hash];
+                        // mod.appendChild(span);
+                    }
+                } else {
+                    // Mod does not have metadata
+                    if (modtxt.length > 125) {
+                    try {
+                        mod.innerText = modtxt.match(/data:text\/\S+?;fs=\S+;/m)[0]
+                    } catch (error) {
+                        mod.innerText = "Unknown Mod.";
+                    }
+                    } else { mod.innerText = modtxt; }
+                }
+
+                var spacer = document.createElement("td");
+                spacer.classList.add("nothing");
+                var controls = document.createElement("td");
+
+                var deleteBtn = document.createElement("button");
+                deleteBtn.innerText = "Delete";
+                deleteBtn.style.height = "3rem";
+                deleteBtn.addEventListener("click", async () => {
+                    // await removeMod(i);
+                    window.modapi_displayModGui();
+                });
+                deleteBtn.classList.add("button");
+                // controls.appendChild(deleteBtn);
+
+                if (typeof ModAPI.meta._configMap[hash] === "function") {
+                    var configBtn = document.createElement("button");
+                    configBtn.innerText = "Config";
+                    configBtn.style.height = "3rem";
+                    configBtn.style.marginLeft = "1rem";
+                    configBtn.addEventListener("click", async () => {
+                        ModAPI.meta._configMap[hash]();
+                    });
+                    configBtn.classList.add("button");
+                    // controls.appendChild(configBtn);
+                }
+
+                // tr.appendChild(mod);
+                // tr.appendChild(spacer);
+                // tr.appendChild(controls);
+                // tbody.appendChild(tr);
+            });
+            var once = false;
+            if (cb) {
+            document.querySelector("#modapi_gui_container ._doneButton").addEventListener("mousedown", ()=>{
+                if (once) {
+                return;
+                }
+                once = true;
+                cb();
+                document.querySelector("#modapi_gui_container").remove();
+            })
+            }
+        }
+        
+        window.modapi_clearmods = async () => {
+            await resetMods();
+            window.modapi_displayModGui();
+        }
+        window.modapi_addmod = async () => {
+            var mod = window.prompt("Paste in the URL of the mod you wish to add: ");
+            if (!mod || mod.length === 0) {
+            console.log("mod none")
+            return;
+            }
+            await addMod(mod);
+            window.modapi_displayModGui();
+            console.log("ok")
+        }
+        window.modapi_uploadmod = async () => {
+            var f = document.createElement("input");
+            f.type = "file";
+            //f.accept = "text/javascript";
+            f.multiple = true;
+            f.addEventListener("input", async () => {
+            if (f.files.length < 1) {
+                return;
+            }
+            for (let i = 0; i < f.files.length; i++) {
+                await addFileMod(f.files[i].name, (await fileToText(f.files[i])));
+            }
+            window.modapi_displayModGui();
+            });
+            f.click();
+        }
+        })();
+    </script>
+    <script id="modapi_postinit_data" src="modapi2.js"></script>
+    <div style="margin:0px;width:100%;height:100%;font-family:sans-serif;display:flex;align-items:center;user-select:none;" id="launch_countdown_screen">
+    </div>
+</body>
+</html>
