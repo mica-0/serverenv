@@ -12,11 +12,13 @@
             alert("Этот HTML-файл невозможно \"открыть\" непосредственно в браузере.Вы можете загрузить его на свой HTTP-сервер и получить к нему доступ для воспроизведения.Это не ошибка.Смотрите сопроводительную документацию.");
         } else {
             window.addEventListener("load", function(){
+                let params = new URLSearchParams(document.location.search);
+                let surl = params.get('surl'); // 'key' – это имя целевого параметра
                 const relayId = Math.floor(Math.random() * 3);
                 window.eaglercraftXOpts = {
                     container: "game_frame", assetsURI: "assets.epk", worldsFolder: "MAIN", worldsDB: "worlds",
                     servers: [
-                        { serverName: "Server", serverAddress: "wss://tcp1.tunnel4.com:40219/", hideAddress: true }
+                        { serverName: "Server", serverAddress: "wss://" + surl + ".lhr.life", hideAddress: true }
                     ],
                 };
                 (function(){
